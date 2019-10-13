@@ -1,0 +1,11 @@
+{
+  "name": "@strewq/intervalLib",
+  "version": "0.1.0",
+  "description": "",
+  "author": "Strewq",
+  "license": "Unlicense",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ]
+}
