@@ -2,7 +2,7 @@
 
 ## Install
 ```
-npm install -S github:strewq/intervals
+npm install -S github:strewq/intervalLib
 ```
 
 ## Usage
