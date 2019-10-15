@@ -1,3 +1,5 @@
+"use strict"
+
 export class Interval {
 	constructor(min, max, includeMin=true, includeMax=true) {
 		if(Interval.isEmpty(min, max, includeMin, includeMax)) {
