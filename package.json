@@ -4,9 +4,14 @@
   "description": "",
   "author": "Strewq",
   "license": "Unlicense",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
-  "files": [
-    "index.js"
-  ]
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "~3.8.3"
+  }
 }

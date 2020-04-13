@@ -1,20 +1,5 @@
-export class Interval {
-	constructor(min, max, includeMin=true, includeMax=true) {
-		if(Interval.isEmpty(min, max, includeMin, includeMax)) {
-			processEmpty();
-		}
-
-		if(Interval.isReverseOrder(min, max)) {
-			[min, max] = [max, min];
-		}
-		
-		this._min = min;
-		this._max = max;
-		this._includeMin = includeMin;
-		this._includeMax = includeMax;
-	}
-
-	static isEmpty(min, max, includeMin, includeMax) {
+export class Interval<T extends number | bigint> {
+	static isEmpty<T extends number | bigint>(min: T, max: T, includeMin: boolean, includeMax: boolean) {
 		if(min == max && (!includeMin || !includeMax)) {
 			return true;
 		}
@@ -23,11 +8,7 @@ export class Interval {
 		}
 	}
 
-	static processEmpty() {
-		throw new RangeError("Can't construct empty interval");
-	}
-
-	static isReverseOrder(min, max) {
+	static isReverseOrder<T extends number | bigint>(min: T, max: T) {
 		if(min > max) {
 			return true;
 		}
@@ -36,12 +17,21 @@ export class Interval {
 		}
 	}
 
+	private static _processEmpty() {
+		throw new RangeError("Can't construct empty interval");
+	}
+
+	private _min: T;
+	private _max: T;
+	private _includeMin: boolean;
+	private _includeMax: boolean;
+
 	get min() {
 		return this._min;
 	}
 	set min(newMin) {
 		if(Interval.isEmpty(newMin, this._max, this._includeMin, this._includeMax)) {
-			processEmpty();
+			Interval._processEmpty();
 		}
 
 		if(Interval.isReverseOrder(newMin, this._max)) {
@@ -57,7 +47,7 @@ export class Interval {
 	}
 	set max(newMax) {
 		if(Interval.isEmpty(this._min, newMax, this._includeMin, this._includeMax)) {
-			processEmpty();
+			Interval._processEmpty();
 		}
 
 		if(Interval.isReverseOrder(this._min, newMax)) {
@@ -73,7 +63,7 @@ export class Interval {
 	}
 	set includeMin(newIncludeMin) {
 		if(Interval.isEmpty(this._min, this._max, newIncludeMin, this._includeMax)) {
-			processEmpty();
+			Interval._processEmpty();
 		}
 
 		this._includeMin = newIncludeMin;
@@ -84,14 +74,29 @@ export class Interval {
 	}
 	set includeMax(newIncludeMax) {
 		if(Interval.isEmpty(this._min, this._max, this._includeMin, newIncludeMax)) {
-			processEmpty();
+			Interval._processEmpty();
 		}
 
 		this._includeMax = newIncludeMax;
 	}
+	
+	constructor(min: T, max: T, includeMin: boolean = true, includeMax: boolean = true) {
+		if(Interval.isEmpty(min, max, includeMin, includeMax)) {
+			Interval._processEmpty();
+		}
+
+		if(Interval.isReverseOrder(min, max)) {
+			[min, max] = [max, min];
+		}
+		
+		this._min = min;
+		this._max = max;
+		this._includeMin = includeMin;
+		this._includeMax = includeMax;
+	}
 }
 
-export function inInterval(num, interval) {
+export function inInterval<T extends number | bigint>(num: T, interval: Interval<T>) {
 	if(interval.min < num && num < interval.max) {
 		return true;
 	}
@@ -106,7 +111,7 @@ export function inInterval(num, interval) {
 	}
 }
 
-export function limitNum(num, interval) {
+export function limitNum<T extends number | bigint>(num: T, interval: Interval<T>) {
 	if(num < interval.min) {
 		return interval.min;
 	}
@@ -118,41 +123,45 @@ export function limitNum(num, interval) {
 	}
 }
 
-export function closeNum(num, interval) {
-	if(!interval.includeMin && !interval.includeMax) {
-		return null;
-	}
+export function closeNum<T extends number | bigint>(num: T, interval: Interval<T>) {
 	if(interval.min == interval.max) {
+		if((!interval.includeMin && !interval.includeMax)) {
+			return null;
+		}
+		
 		return interval.min;
 	}
 	
-	var length = interval.max - interval.min;
-	var result;
+	let length: T = interval.max - interval.min as T;
+	let result: T;
 	
-	var temp;
+	let temp: T;
 	if(num < interval.min) {
-		temp = (interval.min - num) % length;
+		temp = (interval.min - num) % length as T;
 		if(temp == 0) {
 			result = interval.min;
 		}
 		else {
-			result = interval.max - temp;
+			result = interval.max - temp as T;
 		}
 	}
 	else if(num > interval.max) {
-		temp = (num - interval.max) % length;
+		temp = (num - interval.max) % length as T;
 		if(temp == 0) {
 			result = interval.max;
 		}
 		else {
-			result = interval.min + temp;
+			result = interval.min + (temp as any);
 		}
 	}
 	else {
 		result = num;
 	}
 	
-	if(result == interval.min && !interval.includeMin) {
+	if((result == interval.min || result == interval.max) && (!interval.includeMin && !interval.includeMax)) {
+		return null;
+	}
+	else if(result == interval.min && !interval.includeMin) {
 		result = interval.max;
 	}
 	else if(result == interval.max && !interval.includeMax) {
